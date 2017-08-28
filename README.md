@@ -1,8 +1,3 @@
----
-output: 
-  html_document: 
-    keep_md: yes
----
 # Activity Monitoring Devices Analysis
 Author : *Sahil Behl*
 
@@ -20,45 +15,60 @@ The variables of the dataset are:
 * **interval**
 
 # Loading and Preprocessing Data
-```{r echo=TRUE}
+
+```r
 unzip(zipfile = "activity.zip")
 activity_mon_data <- read.csv('activity.csv')
 ```
 
 ## What is mean total number of steps taken per day?
-```{r echo=TRUE}
+
+```r
 steps_by_date <- split(activity_mon_data$steps, activity_mon_data$date)
 total_steps_by_date <- sapply(steps_by_date, sum, na.rm = TRUE)
 library(ggplot2)
 qplot(total_steps_by_date,binwidth=1000)
+```
+
+![](ReproReserchProject1_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
+```r
 mean_steps <- mean(total_steps_by_date, na.rm = TRUE)
 median_steps <- median(total_steps_by_date, na.rm =TRUE)
 ```
-The `mean` and `median` of the total number of steps taken per day are `r mean_steps` and `r median_steps` respectively.
+The `mean` and `median` of the total number of steps taken per day are 9354.2295082 and 10395 respectively.
 
 ## What is the average daily activity pattern?
-```{r echo=TRUE}
+
+```r
 averages <- aggregate(x=list(steps = activity_mon_data$steps), by=list(interval = activity_mon_data$interval),
                       FUN=mean, na.rm=TRUE)
 g <- ggplot(averages, aes(interval,steps))
 g + 
   geom_line() +
   ggtitle("Time series plot of the average number of steps taken")
+```
+
+![](ReproReserchProject1_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+```r
 maximum <- max(as.integer(averages$steps))
 int_max <- averages$interval[as.integer(averages$steps) == maximum]
 ```
-The 5-minute interval, on average across all the days in the data set, containing the maximum number of steps is `r int_max`.
+The 5-minute interval, on average across all the days in the data set, containing the maximum number of steps is 835.
 
 ## Impute missing values. Compare imputed to non-imputed data.
 Missing data needed to be imputed. Missing values were imputed by inserting the average for each interval.
-```{r echo=TRUE}
+
+```r
 missing <- is.na(activity_mon_data$steps)
 total_missing <- sum(missing)
 ```
 
-The total number of NA values are `r total_missing`
+The total number of NA values are 2304
 
-```{r echo=TRUE}
+
+```r
 i<-1
 imputed_data <- activity_mon_data
 while(i<= nrow(imputed_data)){
@@ -74,26 +84,33 @@ imp_total_steps <- sapply(steps_by_date, sum, na.rm = TRUE)
 par(mfrow = c(1,2), mar = c(2,2,2,2))
 hist(imp_total_steps, main = "Histogram for imputed data",xlab = "Total steps")
 hist(total_steps_by_date, main = "Histogram for data",xlab = "Total steps")
+```
+
+![](ReproReserchProject1_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+
+```r
 imp_mean_steps <- mean(imp_total_steps, na.rm = TRUE)
 imp_median_steps <- median(imp_total_steps, na.rm =TRUE)
 ```
-The `mean` and `median` of the total number of steps taken per day are `r imp_mean_steps` and `r imp_median_steps` respectively.
-```{r echo =TRUE}
+The `mean` and `median` of the total number of steps taken per day are 1.0766189\times 10^{4} and 1.0766189\times 10^{4} respectively.
+
+```r
 mean_diff<- imp_mean_steps - mean_steps
 median_diff <- imp_median_steps - median_steps
 total_step_diff <- sum(imp_total_steps) - sum(total_steps_by_date)
 ```
-* The imputed data mean is `r imp_mean_steps`
-* The imputed data median is `r imp_median_steps`
-* The difference between the non-imputed mean and imputed mean is `r mean_diff`
-* The difference between the non-imputed median and imputed median is `r median_diff`
-* The difference between total number of steps between imputed and non-imputed data is `r total_step_diff`. Thus, there were `r total_step_diff` more steps in the imputed data.
+* The imputed data mean is 1.0766189\times 10^{4}
+* The imputed data median is 1.0766189\times 10^{4}
+* The difference between the non-imputed mean and imputed mean is 1411.959171
+* The difference between the non-imputed median and imputed median is 371.1886792
+* The difference between total number of steps between imputed and non-imputed data is 8.6129509\times 10^{4}. Thus, there were 8.6129509\times 10^{4} more steps in the imputed data.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
 Created a plot to compare and contrast number of steps between the week and weekend. There is a higher peak earlier on weekdays, and more overall activity on weekends.  
 
-```{r echo= TRUE}
+
+```r
 weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday",  "Friday")
 imputed_data$dow = as.factor(ifelse(is.element(
                           weekdays(as.Date(imputed_data$date)),
@@ -108,4 +125,6 @@ xyplot(steps_by_interval_i$steps ~ steps_by_interval_i$interval|steps_by_interva
        layout=c(1,2), 
        type="l")
 ```
+
+![](ReproReserchProject1_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
